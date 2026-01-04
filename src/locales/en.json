@@ -1,0 +1,198 @@
+{
+  "auth": {
+    "authRequired": "Authorization required",
+    "missingToken": "Access token missing",
+    "invalidToken": "Invalid or expired access token",
+    "forbidden": "Access forbidden",
+    "emailUsed": "Email {{email}} is already in use",
+    "invalidProvider": "Invalid authentication provider",
+    "unauthorized": "Unauthorized",
+    "userWithSuchEmailNotFount": "User with email {{email}} not found",
+    "invalidAuthMethond": "Invalid authentication method",
+    "invalidPassword": "Invalid password",
+    "passwordResetUnavailableForOAuth": "Password reset is not available for accounts created via Google or other providers.",
+    "tooManyResetRequests": "Too many password reset requests. Please try again later.",
+    "resetEmailSent": "A password reset link has been sent to your email.",
+    "passwordChangedSuccess": "Your password has been changed successfully."
+  },
+  "validation": {
+    "invalidDate": "Invalid date",
+    "required": "This field is required",
+    "minLength": "Minimum length is {{min}} characters",
+    "maxLength": "Maximum length is {{max}} characters",
+    "invalidEmail": "Invalid email address",
+    "lowercase": "Password must contain at least one lowercase letter",
+    "uppercase": "Password must contain at least one uppercase letter",
+    "digit": "Password must contain at least one digit",
+    "symbol": "Password must contain at least one symbol",
+    "invalid": "Invalid token",
+    "tokenRefreshInvalid": "Invalid refresh token",
+    "tokenResetInvalid": "Invalid password reset token",
+    "tokenVerifyInvalid": "Invalid email verification token",
+    "nameTooShort": "Name must be at least {{min}} characters long",
+    "nameTooLong": "Name must be at most {{max}} characters long",
+    "invalidUrl": "Invalid URL",
+    "invalidObjectId": "Invalid object identifier",
+    "userRequired": "User is required to perform this action"
+  },
+  "permissions": {
+    "forbidden": "You do not have permission to perform this action",
+    "planRestriction": "Your plan does not allow this action"
+  },
+  "subscription": {
+    "noPlan": "You have no active subscription plan",
+    "trialActive": "Trial period is active",
+    "trialExpired": "Trial period has expired",
+    "expired": "Subscription expired",
+    "paymentRequired": "Payment required to continue using the service",
+    "notFound": "Subscription not found",
+    "canceled": "Subscription canceled",
+    "fetched": "Subscription successfully retrieved"
+  },
+  "payments": {
+    "subscriptionParamsMissing": "Subscription parameters missing",
+    "initFailed": "Failed to initialize payment",
+    "notFound": "Payment not found",
+    "rawBodyMissing": "Missing request body for signature verification",
+    "statusFetched": "Payment status successfully retrieved",
+    "initSuccess": "Payment successfully initialized",
+    "planNotFound": "Plan not found",
+    "productNotFound": "Product not found",
+    "providerNotSupported": "Payment provider not supported",
+    "subscriptionAlreadyActive": "Subscription is already active"
+  },
+  "bonus": {
+    "historyFetched": "Bonus history successfully retrieved",
+    "updated": "Bonus values updated successfully"
+  },
+  "crud": {
+    "created": "Successfully created",
+    "updated": "Successfully updated",
+    "deleted": "Successfully deleted",
+    "notFound": "Resource not found",
+    "conflict": "Data conflict — resource already exists"
+  },
+  "upload": {
+    "tooLarge": "File size exceeds the allowed limit of {{limitMb}} MB",
+    "invalidType": "Invalid file type. Allowed types: {{allowed}}"
+  },
+  "media": {
+    "notFound": "File not found",
+    "noPermission": "You do not have permission to access this file",
+    "fileRequired": "File is required",
+    "invalidType": "Invalid file type. Allowed types: {{allowed}}",
+    "tooLarge": "File size exceeds the allowed limit of {{limitMb}} MB",
+    "uploadFailed": "Failed to upload file",
+    "deleteFailed": "Failed to delete file"
+  },
+  "server": {
+    "internalError": "Internal server error"
+  },
+  "modules": {
+    "notFound": "Not found"
+  },
+  "emails": {
+    "auth": {
+      "reset": {
+        "subject": "Reset your password",
+        "title": "Secure your account",
+        "greeting": "Hi, {{name}}!",
+        "instructions": "We received a request to reset your password. Use the button below to set a new one.",
+        "button": "Create a new password",
+        "ignore": "If you didn't request this, you can safely ignore this email — your password will stay the same.",
+        "preview": "Reset your password and keep your account secure."
+      },
+      "welcome": {
+        "subject": "Welcome to Themplate",
+        "title": "You're in! Let's get productive",
+        "greeting": "Hi, {{name}} — we’re happy you’re here.",
+        "highlight": "Your workspace is ready and waiting for you.",
+        "intro": "From onboarding flows to announcements, all communication is in one place.",
+        "nextSteps": "Jump into your dashboard to connect your data, invite teammates, and launch your first experience.",
+        "button": "Open dashboard",
+        "footer": "Need tips? Our team is a reply away.",
+        "preview": "Your Themplate account is live—start exploring your dashboard."
+      },
+      "passwordChanged": {
+        "subject": "Your password has been updated",
+        "title": "Password updated successfully",
+        "greeting": "Hi, {{name}}!",
+        "confirmation": "We’ve updated your password and secured your account.",
+        "footer": "If you didn’t make this change, reset your password immediately or contact support.",
+        "preview": "Your password was changed. No action required if this was you."
+      }
+    },
+    "billing": {
+      "actions": {
+        "viewInvoice": "View invoice",
+        "viewReceipt": "View receipt",
+        "managePlan": "Manage plan",
+        "updatePayment": "Update payment method"
+      },
+      "common": {
+        "nextRenewal": "Next renewal on {{date}}"
+      },
+      "paymentSucceededOneTime": {
+        "subject": "Purchase confirmed",
+        "preview": "Thank you for your purchase — your access is ready.",
+        "title": "Payment confirmed",
+        "greeting": "Thanks, {{name}}! Your one-time purchase was successful.",
+        "summary": "{{product}} — {{amount}} {{currency}} processed.",
+        "footer": "The receipt is saved in your account. Keep this email for your records."
+      },
+      "paymentSucceededSubscription": {
+        "subject": "Your subscription is active",
+        "preview": "Subscription activated — you now have full access.",
+        "title": "Welcome to your plan",
+        "greeting": "Hi {{name}}, your {{plan}} subscription is live.",
+        "summary": "{{plan}} — {{amount}} {{currency}} charged.",
+        "footer": "You can manage billing details anytime from your workspace."
+      },
+      "cancelAtPeriodEnd": {
+        "subject": "Your subscription will end soon",
+        "preview": "Auto-renewal is off — here’s what to expect.",
+        "title": "Auto-renewal turned off",
+        "greeting": "Hi {{name}}, we scheduled the end of your {{plan}} plan.",
+        "summary": "Your access continues until {{date}}.",
+        "keepAccess": "Changed your mind? Keep your tools running without interruption.",
+        "button": "Keep my subscription",
+        "footer": "If you take no action, your access will end at the date above."
+      },
+      "subscriptionResumed": {
+        "subject": "Auto-renewal restored",
+        "preview": "Your subscription is active again — nothing will be interrupted.",
+        "title": "Subscription resumed",
+        "greeting": "Hi {{name}}, we turned renewal back on for {{plan}}.",
+        "summary": "You’ll keep your current benefits without pauses.",
+        "footer": "You can adjust billing preferences anytime."
+      },
+      "subscriptionRenewed": {
+        "subject": "Subscription renewed",
+        "preview": "We processed your renewal and kept your access active.",
+        "title": "Renewal successful",
+        "greeting": "Hi {{name}}, your {{plan}} plan just renewed.",
+        "summary": "{{plan}} — {{amount}} {{currency}} charged.",
+        "footer": "Thank you for staying with us! Your updated invoice is available in the dashboard."
+      },
+      "paymentFailed": {
+        "subject": "Payment issue — action needed",
+        "preview": "We couldn’t process your payment. Update your card to avoid interruptions.",
+        "title": "Payment failed",
+        "greeting": "Hi {{name}}, we couldn’t process the latest payment for {{plan}}.",
+        "summary": "Amount: {{amount}} {{currency}}.",
+        "retry": "We’ll retry on {{date}}. Update your payment method to avoid service disruption.",
+        "footer": "If the issue persists, reply to this email and we’ll help."
+      },
+      "subscriptionCanceled": {
+        "subject": "Subscription canceled",
+        "preview": "Your subscription ended. Restore access anytime.",
+        "title": "Subscription closed",
+        "greeting": "Hi {{name}}, your {{plan}} subscription has ended.",
+        "summary": "We’re sorry to see you go.",
+        "details": "You can restart your plan anytime to regain access to all premium features.",
+        "button": "Restart subscription",
+        "footer": "Have feedback? Reply to this email — we read every note."
+      }
+    }
+  }
+}

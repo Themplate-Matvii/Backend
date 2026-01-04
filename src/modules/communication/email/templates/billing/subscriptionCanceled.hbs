@@ -1,0 +1,13 @@
+<h1 style="font-size:24px; margin:0 0 12px; color:#0f172a;">{{t "emails.billing.subscriptionCanceled.title"}}</h1>
+<p style="margin:0 0 10px; color:#475569; font-size:15px;">{{t "emails.billing.subscriptionCanceled.greeting" name=name plan=planName}}</p>
+
+<div style="background:#fff7ed; border-radius:14px; padding:16px 18px; border:1px solid #fed7aa; margin-bottom:16px;">
+  <p style="margin:0; color:#9a3412; font-weight:700;">{{t "emails.billing.subscriptionCanceled.summary"}}</p>
+  <p style="margin:6px 0 0; color:#9a3412;">{{t "emails.billing.subscriptionCanceled.details"}}</p>
+</div>
+
+{{#if renewUrl}}
+  <a href="{{renewUrl}}" class="btn-primary" style="background:#2563eb; color:#fff; padding:12px 18px; border-radius:12px; font-weight:700; text-decoration:none; display:inline-block;">{{t "emails.billing.subscriptionCanceled.button"}}</a>
+{{/if}}
+
+<p style="margin:16px 0 0; color:#94a3b8; font-size:13px;">{{t "emails.billing.subscriptionCanceled.footer"}}</p>

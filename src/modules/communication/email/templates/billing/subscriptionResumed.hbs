@@ -1,0 +1,15 @@
+<h1 style="font-size:24px; margin:0 0 12px; color:#0f172a;">{{t "emails.billing.subscriptionResumed.title"}}</h1>
+<p style="margin:0 0 10px; color:#475569; font-size:15px;">{{t "emails.billing.subscriptionResumed.greeting" name=name plan=planName}}</p>
+
+<div style="background:#f0fdf4; border-radius:14px; padding:16px 18px; border:1px solid #bbf7d0; margin-bottom:16px;">
+  <p style="margin:0; color:#166534; font-weight:700;">{{t "emails.billing.subscriptionResumed.summary" plan=planName}}</p>
+  {{#if periodEnd}}
+    <p style="margin:6px 0 0; color:#166534;">{{t "emails.billing.common.nextRenewal" date=periodEnd}}</p>
+  {{/if}}
+</div>
+
+{{#if manageUrl}}
+  <a href="{{manageUrl}}" class="btn-primary" style="background:#2563eb; color:#fff; padding:12px 18px; border-radius:12px; font-weight:700; text-decoration:none; display:inline-block;">{{t "emails.billing.actions.managePlan"}}</a>
+{{/if}}
+
+<p style="margin:16px 0 0; color:#94a3b8; font-size:13px;">{{t "emails.billing.subscriptionResumed.footer"}}</p>
