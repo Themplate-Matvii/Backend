@@ -13,14 +13,14 @@ import { AppError } from "@utils/common/appError";
 import { emailTemplates } from "@modules/communication/email/email.templates";
 import { getAuthProvider } from "@modules/user/auth/providers";
 import { getProviderMeta } from "@modules/user/auth/providers/base/provider";
-import { getUserPermissionTree } from "@utils/auth/permissions";
 import { ForgotPasswordDTO } from "@modules/user/auth/auth.validation";
 import { subscriptionService } from "@modules/billing/subscriptions/subscription.service";
 import { buildUserPayload, UserDocumentLike } from "@utils/auth/userPayload";
 import { MediaService } from "@modules/assets/media/media.service";
 import { ThemeEnum } from "@modules/user/settings/types";
 
-const REFRESH_COOKIE = "rt";
+export const REFRESH_COOKIE = "refresh_token";
+export const ACCESS_COOKIE = "access_token";
 const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 
 /* --------------------------- helpers --------------------------- */
@@ -42,6 +42,16 @@ function msToNumber(value: string): number {
     default:
       return 7 * 24 * 60 * 60 * 1000;
   }
+}
+
+function accessCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: ENV.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: msToNumber(ENV.JWT_EXPIRES_IN),
+  };
 }
 
 function refreshCookieOptions() {
@@ -365,6 +375,7 @@ export class AuthService {
     });
 
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
     return formatAuthResponse(user, accessToken);
   }
 
@@ -465,6 +476,7 @@ export class AuthService {
     });
 
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
     return formatAuthResponse(user, accessToken);
   }
 
@@ -510,6 +522,7 @@ export class AuthService {
     });
 
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
     return formatAuthResponse(user, accessToken);
   }
 
@@ -553,6 +566,7 @@ export class AuthService {
     await session.save();
 
     res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
     return { accessToken };
   }
 
@@ -570,6 +584,7 @@ export class AuthService {
       } catch {}
     }
     res.clearCookie(REFRESH_COOKIE, { path: "/" });
+    res.clearCookie(ACCESS_COOKIE, { path: "/" });
   }
 
   /* ------------------------- Password flows ------------------------- */

@@ -147,8 +147,6 @@ export const login = asyncHandler<RequestWithUser>(async (req, res) => {
 });
 
 export const refresh = asyncHandler<RequestWithUser>(async (req, res) => {
-  console.log("refresh controller");
-
   const result = await authService.refresh(req, res);
   res.status(200).json(result);
 });
