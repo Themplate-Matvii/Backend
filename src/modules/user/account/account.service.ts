@@ -71,7 +71,9 @@ export class AccountService {
       ? await providerImpl.verify(input.idToken)
       : input.code
         ? await providerImpl.getProfile(input.code, {
-            redirectUriOverride: input.redirect_uri,
+            redirectUriOverride:
+              input.redirect_uri ||
+              (input.provider === "google" ? "postmessage" : undefined),
             code_verifier: input.code_verifier,
           })
         : null;

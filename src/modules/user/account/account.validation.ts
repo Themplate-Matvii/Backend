@@ -54,7 +54,7 @@ export const oauthLinkSchema = {
     provider: z.enum(["google", "apple", "github"]),
     idToken: z.string().trim().min(1).optional(),
     code: z.string().trim().min(1).optional(),
-    redirect_uri: z.string().trim().url().optional(),
+    redirect_uri: z.string().trim().url().or(z.literal("postmessage")).optional(),
     code_verifier: z.string().trim().optional(),
   }),
 };
