@@ -8,6 +8,7 @@ import { plans } from "@constants/payments/plans";
 import { stripeProvider } from "@modules/billing/payments/providers/stripe/provider";
 import { API_CONFIG, apiPath } from "@config/api";
 import { oneTimeProducts } from "@constants/payments/oneTimeProducts";
+import { startUserDeletionWorker } from "@modules/user/account/userDeletionJob.worker";
 
 dotenv.config();
 initI18n();
@@ -25,6 +26,8 @@ async function start() {
 
     await stripeProvider.syncOneTimeProducts(oneTimeProducts);
     logger.info("✅ One-time products synced with Stripe");
+
+    startUserDeletionWorker();
 
     // start server
     app.listen(Number(PORT), () => {

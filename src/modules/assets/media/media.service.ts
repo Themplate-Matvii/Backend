@@ -78,7 +78,7 @@ export class MediaService {
       uploadedBy: this.serializeUploader(
         mediaObj.uploadedBy ?? (media as any).uploadedBy,
       ),
-      url: MediaService.getUrl(mediaObj.filename),
+      url: mediaObj.url || MediaService.getUrl(mediaObj.objectKey || mediaObj.filename),
     };
   }
 
@@ -119,12 +119,17 @@ export class MediaService {
 
     return Media.create({
       filename,
+      storageProvider: "b2",
+      bucket: ENV.B2_BUCKET_NAME,
+      objectKey: filename,
+      url: this.getUrl(filename),
       uploadedBy: userId,
       size: buffer.length,
       mimeType,
       name: meta.name,
       description: meta.description,
       contentHash,
+      status: "active",
     });
   }
 
@@ -217,11 +222,15 @@ export class MediaService {
       throw new AppError(messages.media.notFound, 404);
     }
 
+    media.status = "deleting";
+    await media.save();
+
     await b2.deleteObject({
       Bucket: ENV.B2_BUCKET_NAME,
-      Key: media.filename,
+      Key: (media as any).objectKey || media.filename,
     });
 
+    media.status = "deleted";
     await media.deleteOne();
     return true;
   }

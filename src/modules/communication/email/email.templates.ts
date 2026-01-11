@@ -26,6 +26,16 @@ export const emailTemplates = {
       subjectKey: messages.emails.auth.passwordChanged.subject,
       previewTextKey: messages.emails.auth.passwordChanged.preview,
     },
+    oneTimeCode: {
+      file: "auth/oneTimeCode",
+      subjectKey: messages.emails.auth.oneTimeCode.subject,
+      previewTextKey: messages.emails.auth.oneTimeCode.preview,
+    },
+    emailChanged: {
+      file: "auth/emailChanged",
+      subjectKey: messages.emails.auth.emailChanged.subject,
+      previewTextKey: messages.emails.auth.emailChanged.preview,
+    },
   },
   billing: {
     paymentSucceededOneTime: {

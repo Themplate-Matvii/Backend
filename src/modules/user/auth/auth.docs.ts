@@ -45,6 +45,23 @@ export const authSchemas = {
     required: ["success", "message"],
   },
 
+  AuthConfigResponse: {
+    type: "object",
+    properties: {
+      enabledProviders: {
+        type: "array",
+        items: { type: "string" },
+        example: ["email", "google", "apple", "github"],
+      },
+      oauth: {
+        type: "object",
+        properties: {
+          googleClientId: { type: "string", nullable: true },
+        },
+      },
+    },
+  },
+
   // Accept either idToken or code. code_verifier for PKCE. redirect_uri is optional override for token exchange.
   OauthLoginRequest: {
     type: "object",
@@ -233,6 +250,9 @@ export const authSchemas = {
               properties: {
                 provider: { type: "string", example: "google" },
                 providerId: { type: "string", example: "1234567890" },
+                email: { type: "string", example: "user@example.com" },
+                addedAt: { type: "string", format: "date-time" },
+                lastUsedAt: { type: "string", format: "date-time" },
               },
             },
           },
@@ -264,7 +284,13 @@ export const authSchemas = {
         },
         plan: "pro",
         locale: "en",
-        authProviders: [{ provider: "google", providerId: "1234567890" }],
+        authProviders: [
+          {
+            provider: "google",
+            providerId: "1234567890",
+            email: "user@example.com",
+          },
+        ],
         settings: {},
         permissions: {
           users: {
@@ -413,7 +439,7 @@ export const authPaths = {
           required: true,
           schema: {
             type: "string",
-            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "local"),
+            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "email"),
           },
           description: "OAuth provider",
         },
@@ -525,7 +551,7 @@ export const authPaths = {
           required: true,
           schema: {
             type: "string",
-            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "local"),
+            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "email"),
           },
           description: "OAuth provider",
         },
@@ -631,7 +657,7 @@ export const authPaths = {
           required: true,
           schema: {
             type: "string",
-            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "local"),
+            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "email"),
           },
           description: "OAuth provider",
         },
@@ -693,7 +719,7 @@ export const authPaths = {
           required: true,
           schema: {
             type: "string",
-            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "local"),
+            enum: AUTH_PROVIDER_KEYS.filter((e) => e !== "email"),
           },
           description: "OAuth provider",
         },
@@ -1031,6 +1057,22 @@ export const authPaths = {
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorEnvelope" },
+            },
+          },
+        },
+      },
+    },
+  },
+  [apiPath(`${API_CONFIG.ROUTES.AUTH}/config`)]: {
+    get: {
+      summary: "Get enabled auth providers",
+      tags: ["Auth"],
+      responses: {
+        "200": {
+          description: "Auth config",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/AuthConfigResponse" },
             },
           },
         },
