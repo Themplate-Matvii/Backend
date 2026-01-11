@@ -20,6 +20,8 @@ const safeUrl = z
   .url(messages.validation.invalidUrl)
   .max(2048, `${messages.validation.maxLength}|{"max":2048}`);
 
+const oauthRedirectUri = z.union([safeUrl, z.literal("postmessage")]);
+
 const stateStr = z
   .string()
   .trim()
@@ -201,7 +203,7 @@ export const oauthCallbackGetSchema = {
       state: stateStr,
       redirect: safeUrl.optional(),
       // optional override for token exchange if provider requires exact URI
-      redirect_uri: safeUrl.optional(),
+      redirect_uri: oauthRedirectUri.optional(),
       intent: oauthIntent,
       theme: z.nativeEnum(ThemeEnum).optional(),
     })
@@ -227,7 +229,7 @@ export const oauthCallbackPostSchema = {
       code: codeStr,
       state: stateStr,
       redirect: safeUrl.optional(),
-      redirect_uri: safeUrl.optional(),
+      redirect_uri: oauthRedirectUri.optional(),
       intent: oauthIntent,
       theme: z.nativeEnum(ThemeEnum).optional(),
     })
@@ -253,7 +255,7 @@ export const oauthDirectSchema = {
     .object({
       idToken: idTokenStr.optional(),
       code: codeStr.optional(),
-      redirect_uri: safeUrl.optional(),
+      redirect_uri: oauthRedirectUri.optional(),
       code_verifier: codeVerifier,
       intent: oauthIntent,
       theme: z.nativeEnum(ThemeEnum).optional(),
