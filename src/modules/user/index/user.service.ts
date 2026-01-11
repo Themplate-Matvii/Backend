@@ -17,6 +17,7 @@ import { MediaService } from "@modules/assets/media/media.service";
 import { AppError } from "@utils/common/appError";
 import { messages } from "@constants/messages";
 import Media from "@modules/assets/media/media.model";
+import { deleteUserData } from "@modules/user/account/userDeletion.service";
 
 export class UserService {
   async getCurrent(userId: string): Promise<UserWithPermissions | null> {
@@ -212,7 +213,6 @@ export class UserService {
   }
 
   async delete(userId: string): Promise<boolean> {
-    const result = await UserModel.findByIdAndDelete(userId).exec();
-    return !!result;
+    return deleteUserData(userId);
   }
 }
