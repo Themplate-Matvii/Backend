@@ -188,7 +188,6 @@ export class AuthService {
       prompt: opts.prompt as any,
       access_type: opts.access_type,
       extra: opts.extra,
-      redirectUri: ENV.OAUTH_ALLOWED_REDIRECTS,
     });
     return url;
   }
@@ -275,18 +274,20 @@ export class AuthService {
     const requireVerified = meta.requireVerifiedEmailToLink;
 
     let user: User | null = null;
-    const identity = await AuthIdentityModel.findOne({
+    let identity = await AuthIdentityModel.findOne({
       provider,
       providerId,
     });
     if (identity) {
       user = await UserModel.findById(identity.userId);
+      if (!user) {
+        await AuthIdentityModel.deleteOne({ _id: identity._id });
+        identity = null;
+      }
     }
 
     if (intent === "login") {
-      if (user) {
-        // ok
-      } else if (email) {
+      if (!user && email) {
         const byEmail = await UserModel.findOne({ email });
 
         if (byEmail) {
@@ -302,60 +303,76 @@ export class AuthService {
             });
           }
 
-          throw new AppError(messages.auth.forbidden, 403, {
+          if (requireVerified && !emailVerified) {
+            throw new AppError(messages.auth.forbidden, 401);
+          }
+
+          user = byEmail;
+        } else {
+          throw new AppError(messages.auth.userWithSuchEmailNotFount, 401, {
             email,
-            provider,
           });
         }
+      }
 
-        throw new AppError(messages.auth.userWithSuchEmailNotFount, 401, {
-          email,
-        });
-      } else {
+      if (!user && !email) {
         throw new AppError(messages.auth.userWithSuchEmailNotFount, 401);
       }
     } else {
       // intent === "register"
-      if (user) {
-        // already registered, treat as login
-      } else {
+      if (!user) {
         if (email) {
           const byEmail = await UserModel.findOne({ email });
           if (byEmail) {
-            throw new AppError(messages.auth.emailUsed, 409, { email });
+            const hasLocal =
+              !!byEmail.passwordHash ||
+              !!byEmail.password ||
+              byEmail.authProviders.some((p: any) => p.provider === "email");
+
+            if (hasLocal) {
+              throw new AppError(messages.auth.emailUsed, 409, { email });
+            }
+
+            if (requireVerified && !emailVerified) {
+              throw new AppError(messages.auth.forbidden, 401);
+            }
+
+            user = byEmail;
           }
         }
 
-        if (requireVerified && email && !emailVerified) {
-          throw new AppError(messages.auth.forbidden, 401);
-        }
+        if (!user) {
+          if (requireVerified && email && !emailVerified) {
+            throw new AppError(messages.auth.forbidden, 401);
+          }
 
-        user = await UserModel.create({
-          email,
-          emailVerified: Boolean(emailVerified),
-          emailVerifiedAt: emailVerified ? new Date() : undefined,
-          name,
-          role: "user",
-          settings: {
-            locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
-            theme,
-          },
-          authProviders: [
-            {
-              provider: provider as any,
-              providerId,
-              email,
-              addedAt: new Date(),
-              lastUsedAt: new Date(),
+          user = await UserModel.create({
+            email,
+            emailVerified: Boolean(emailVerified),
+            emailVerifiedAt: emailVerified ? new Date() : undefined,
+            name,
+            role: "user",
+            settings: {
+              locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
+              theme,
             },
-          ],
-        });
+            authProviders: [
+              {
+                provider: provider as any,
+                providerId,
+                email,
+                addedAt: new Date(),
+                lastUsedAt: new Date(),
+              },
+            ],
+          });
 
-        await AuthIdentityModel.create({
-          provider,
-          providerId,
-          userId: user._id,
-        });
+          await AuthIdentityModel.create({
+            provider,
+            providerId,
+            userId: user._id,
+          });
+        }
       }
     }
 
@@ -364,7 +381,7 @@ export class AuthService {
     }
 
     const linked = user.authProviders.find(
-      (p: any) => p.provider === provider && p.providerId === providerId,
+      (p: any) => p.provider === provider,
     );
     if (!linked) {
       user.authProviders.push({
@@ -376,6 +393,10 @@ export class AuthService {
       });
     } else {
       linked.lastUsedAt = new Date();
+      if (!linked.providerId && providerId) linked.providerId = providerId;
+      if (linked.providerId !== providerId && providerId) {
+        linked.providerId = providerId;
+      }
       if (!linked.email && email) linked.email = email;
     }
 
