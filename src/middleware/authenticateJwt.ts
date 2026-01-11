@@ -21,16 +21,6 @@ function authenticateJwt(required = true) {
       token = (req as any).cookies?.[ACCESS_COOKIE];
     }
 
-    console.log("authenticateJwt", {
-      hasAuthHeader: Boolean(authHeader),
-      hasCookie: Boolean((req as any).cookies?.[ACCESS_COOKIE]),
-      tokenSource: token
-        ? authHeader?.startsWith("Bearer ")
-          ? "bearer"
-          : "cookie"
-        : "none",
-    });
-
     // 3) No token
     if (!token) {
       if (required) return next(new AppError(messages.auth.missingToken, 401));

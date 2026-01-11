@@ -10,7 +10,7 @@ export const IS_PROD = isProd;
 
 // Normalize ports with sensible defaults for dev
 const PORT = Number(process.env.PORT) || 5000;
-const FRONTEND_PORT = Number(process.env.FRONTEND_PORT) || 5173;
+const FRONTEND_PORT = Number(process.env.FRONTEND_PORT) || 3000;
 
 // Backend base URL: in prod take from env, in dev fallback to localhost
 const BASE_URL =
