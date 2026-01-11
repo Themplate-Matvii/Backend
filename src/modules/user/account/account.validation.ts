@@ -10,6 +10,14 @@ const e164Phone = phoneSchema.regex(/^\+[1-9]\d{1,14}$/, {
   message: messages.validation.invalidPhone,
 });
 
+const optionalPhoneSchema = z.preprocess(
+  (value) => {
+    if (value === "" || value === null) return undefined;
+    return value;
+  },
+  e164Phone.optional(),
+);
+
 const countrySchema = z
   .string()
   .trim()
@@ -41,7 +49,7 @@ export const updateProfileSchema = {
   body: z
     .object({
       birthday: dateSchema.optional(),
-      phone: e164Phone.optional(),
+      phone: optionalPhoneSchema,
       country: countrySchema.optional(),
       timezone: timezoneSchema.optional(),
     })
