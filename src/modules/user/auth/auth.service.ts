@@ -272,40 +272,72 @@ export class AuthService {
     req: RequestWithUser,
     res: Response,
   ) {
-    try {
-      const provider = profile.provider;
-      const providerId = profile.providerId;
-      const email = profile.email?.toLowerCase();
-      const emailVerified = profile.emailVerified;
-      const name = profile.name;
-      const avatar = profile.avatar;
+    const provider = profile.provider;
+    const providerId = profile.providerId;
+    const email = profile.email?.toLowerCase();
+    const emailVerified = profile.emailVerified;
+    const name = profile.name;
+    const avatar = profile.avatar;
 
-      const meta = getProviderMeta(provider);
-      const requireVerified = meta.requireVerifiedEmailToLink;
+    const meta = getProviderMeta(provider);
+    const requireVerified = meta.requireVerifiedEmailToLink;
 
-      if (!providerId) {
-        throw new AppError(messages.auth.invalidToken, 400, {
-          reason: "missing_provider_id",
-        });
-      }
-
-      let user: User | null = null;
-      let identity = await AuthIdentityModel.findOne({
-        provider,
-        providerId,
+    if (!providerId) {
+      throw new AppError(messages.auth.invalidToken, 400, {
+        reason: "missing_provider_id",
       });
-      if (identity) {
-        user = await UserModel.findById(identity.userId);
-        if (!user) {
-          await AuthIdentityModel.deleteOne({ _id: identity._id });
-          identity = null;
+    }
+
+    let user: User | null = null;
+    let identity = await AuthIdentityModel.findOne({
+      provider,
+      providerId,
+    });
+    if (identity) {
+      user = await UserModel.findById(identity.userId);
+      if (!user) {
+        await AuthIdentityModel.deleteOne({ _id: identity._id });
+        identity = null;
+      }
+    }
+
+    if (intent === "login") {
+      if (!user && email) {
+        const byEmail = await UserModel.findOne({ email });
+
+        if (byEmail) {
+          const hasLocal =
+            !!byEmail.passwordHash ||
+            !!byEmail.password ||
+            byEmail.authProviders.some((p: any) => p.provider === "email");
+
+          if (hasLocal) {
+            throw new AppError(messages.auth.invalidAuthMethond, 400, {
+              email,
+              provider,
+            });
+          }
+
+          if (requireVerified && !emailVerified) {
+            throw new AppError(messages.auth.forbidden, 401);
+          }
+
+          user = byEmail;
+        } else {
+          throw new AppError(messages.auth.userWithSuchEmailNotFount, 401, {
+            email,
+          });
         }
       }
 
-      if (intent === "login") {
-        if (!user && email) {
+      if (!user && !email) {
+        throw new AppError(messages.auth.userWithSuchEmailNotFount, 401);
+      }
+    } else {
+      // intent === "register"
+      if (!user) {
+        if (email) {
           const byEmail = await UserModel.findOne({ email });
-
           if (byEmail) {
             const hasLocal =
               !!byEmail.passwordHash ||
@@ -313,10 +345,7 @@ export class AuthService {
               byEmail.authProviders.some((p: any) => p.provider === "email");
 
             if (hasLocal) {
-              throw new AppError(messages.auth.invalidAuthMethond, 400, {
-                email,
-                provider,
-              });
+              throw new AppError(messages.auth.emailUsed, 409, { email });
             }
 
             if (requireVerified && !emailVerified) {
@@ -324,155 +353,123 @@ export class AuthService {
             }
 
             user = byEmail;
-          } else {
-            throw new AppError(messages.auth.userWithSuchEmailNotFount, 401, {
-              email,
-            });
           }
         }
 
-        if (!user && !email) {
-          throw new AppError(messages.auth.userWithSuchEmailNotFount, 401);
-        }
-      } else {
-        // intent === "register"
         if (!user) {
-          if (email) {
-            const byEmail = await UserModel.findOne({ email });
-            if (byEmail) {
-              const hasLocal =
-                !!byEmail.passwordHash ||
-                !!byEmail.password ||
-                byEmail.authProviders.some((p: any) => p.provider === "email");
-
-              if (hasLocal) {
-                throw new AppError(messages.auth.emailUsed, 409, { email });
-              }
-
-              if (requireVerified && !emailVerified) {
-                throw new AppError(messages.auth.forbidden, 401);
-              }
-
-              user = byEmail;
-            }
+          if (requireVerified && email && !emailVerified) {
+            throw new AppError(messages.auth.forbidden, 401);
           }
 
-          if (!user) {
-            if (requireVerified && email && !emailVerified) {
-              throw new AppError(messages.auth.forbidden, 401);
-            }
-
-            try {
-              user = await UserModel.create({
-                email,
-                emailVerified: Boolean(emailVerified),
-                emailVerifiedAt: emailVerified ? new Date() : undefined,
-                name,
-                role: "user",
-                settings: {
-                  locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
-                  theme,
+          try {
+            user = await UserModel.create({
+              email,
+              emailVerified: Boolean(emailVerified),
+              emailVerifiedAt: emailVerified ? new Date() : undefined,
+              name,
+              role: "user",
+              settings: {
+                locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
+                theme,
+              },
+              authProviders: [
+                {
+                  provider: provider as any,
+                  providerId,
+                  email,
+                  addedAt: new Date(),
+                  lastUsedAt: new Date(),
                 },
-                authProviders: [
-                  {
-                    provider: provider as any,
-                    providerId,
-                    email,
-                    addedAt: new Date(),
-                    lastUsedAt: new Date(),
-                  },
-                ],
-              });
+              ],
+            });
 
-              identity = await AuthIdentityModel.create({
-                provider,
-                providerId,
-                userId: user._id,
-              });
-            } catch (error: any) {
-              if (error?.code === 11000 && email) {
-                const existing = await UserModel.findOne({ email });
-                if (existing) {
-                  const hasLocal =
-                    !!existing.passwordHash ||
-                    !!existing.password ||
-                    existing.authProviders.some(
-                      (p: any) => p.provider === "email",
-                    );
-
-                  if (hasLocal) {
-                    throw new AppError(messages.auth.emailUsed, 409, { email });
-                  }
-
-                  user = existing;
-                  identity = await AuthIdentityModel.findOne({
-                    provider,
-                    providerId,
-                  });
-                }
-              }
-
-              if (!user) {
-                throw error;
-              }
-            }
-          }
-        }
-      }
-
-      if (!user) {
-        throw new AppError(messages.auth.unauthorized, 401);
-      }
-
-      const linked = user.authProviders.find(
-        (p: any) => p.provider === provider,
-      );
-      if (!linked) {
-        user.authProviders.push({
-          provider: provider as any,
-          providerId,
-          email,
-          addedAt: new Date(),
-          lastUsedAt: new Date(),
-        });
-      } else {
-        linked.lastUsedAt = new Date();
-        if (!linked.providerId && providerId) linked.providerId = providerId;
-        if (linked.providerId !== providerId && providerId) {
-          linked.providerId = providerId;
-        }
-        if (!linked.email && email) linked.email = email;
-      }
-
-      if (!identity) {
-        try {
-          identity = await AuthIdentityModel.create({
-            provider,
-            providerId,
-            userId: user._id,
-          });
-        } catch (error: any) {
-          let handled = false;
-          if (error?.code === 11000) {
-            const existing = await AuthIdentityModel.findOne({
+            identity = await AuthIdentityModel.create({
               provider,
               providerId,
+              userId: user._id,
             });
-            if (existing) {
-              if (String(existing.userId) !== String(user._id)) {
-                throw new AppError(messages.auth.providerAlreadyLinked, 409, {
+          } catch (error: any) {
+            if (error?.code === 11000 && email) {
+              const existing = await UserModel.findOne({ email });
+              if (existing) {
+                const hasLocal =
+                  !!existing.passwordHash ||
+                  !!existing.password ||
+                  existing.authProviders.some(
+                    (p: any) => p.provider === "email",
+                  );
+
+                if (hasLocal) {
+                  throw new AppError(messages.auth.emailUsed, 409, { email });
+                }
+
+                user = existing;
+                identity = await AuthIdentityModel.findOne({
                   provider,
+                  providerId,
                 });
               }
-              identity = existing;
-              handled = true;
             }
-          }
-          if (!handled) {
-            throw error;
+
+            if (!user) {
+              throw error;
+            }
           }
         }
       }
+    }
+
+    if (!user) {
+      throw new AppError(messages.auth.unauthorized, 401);
+    }
+
+    const linked = user.authProviders.find((p: any) => p.provider === provider);
+    if (!linked) {
+      user.authProviders.push({
+        provider: provider as any,
+        providerId,
+        email,
+        addedAt: new Date(),
+        lastUsedAt: new Date(),
+      });
+    } else {
+      linked.lastUsedAt = new Date();
+      if (!linked.providerId && providerId) linked.providerId = providerId;
+      if (linked.providerId !== providerId && providerId) {
+        linked.providerId = providerId;
+      }
+      if (!linked.email && email) linked.email = email;
+    }
+
+    if (!identity) {
+      try {
+        identity = await AuthIdentityModel.create({
+          provider,
+          providerId,
+          userId: user._id,
+        });
+      } catch (error: any) {
+        let handled = false;
+        if (error?.code === 11000) {
+          const existing = await AuthIdentityModel.findOne({
+            provider,
+            providerId,
+          });
+          if (existing) {
+            if (String(existing.userId) !== String(user._id)) {
+              throw new AppError(messages.auth.providerAlreadyLinked, 409, {
+                provider,
+              });
+            }
+            identity = existing;
+            handled = true;
+          }
+        }
+        if (!handled) {
+          throw error;
+        }
+      }
+    }
 
     if (!user.name && name) user.name = name;
     if (!user.avatar && avatar && isObjectIdString(avatar)) {
@@ -487,38 +484,32 @@ export class AuthService {
     }
     await user.save();
 
-      if (avatar) {
-        await this.ensureAvatarImported(avatar, user);
-      }
-
-      const jti = crypto.randomUUID();
-      const userId = (user as any).id || String(user._id);
-      const planKey = await subscriptionService.getUserCurrentPlanKey(userId);
-
-      const { accessToken, refreshToken } = signTokenPair({
-        userId,
-        role: user.role,
-        plan: planKey,
-        jti,
-      });
-
-      await RefreshSessionModel.create({
-        userId: user._id,
-        jti,
-        ip: req.ip,
-        userAgent: req.headers["user-agent"],
-        expiresAt: new Date(
-          Date.now() + msToNumber(ENV.JWT_REFRESH_EXPIRES_IN),
-        ),
-      });
-
-      res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
-      res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
-      return formatAuthResponse(user, accessToken);
-    } catch (err) {
-      console.log('err auth oauth Finish', err);
-      
+    if (avatar) {
+      await this.ensureAvatarImported(avatar, user);
     }
+
+    const jti = crypto.randomUUID();
+    const userId = (user as any).id || String(user._id);
+    const planKey = await subscriptionService.getUserCurrentPlanKey(userId);
+
+    const { accessToken, refreshToken } = signTokenPair({
+      userId,
+      role: user.role,
+      plan: planKey,
+      jti,
+    });
+
+    await RefreshSessionModel.create({
+      userId: user._id,
+      jti,
+      ip: req.ip,
+      userAgent: req.headers["user-agent"],
+      expiresAt: new Date(Date.now() + msToNumber(ENV.JWT_REFRESH_EXPIRES_IN)),
+    });
+
+    res.cookie(REFRESH_COOKIE, refreshToken, refreshCookieOptions());
+    res.cookie(ACCESS_COOKIE, accessToken, accessCookieOptions());
+    return formatAuthResponse(user, accessToken);
   }
 
   /* ----------------------- Credentials auth ----------------------- */
