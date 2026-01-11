@@ -18,6 +18,7 @@ import {
   oauthLogin,
   oauthAuthorize,
   oauthCallback,
+  getAuthConfig,
 } from "@modules/user/auth/auth.controller";
 import { validate } from "@middleware/validate";
 
@@ -29,6 +30,8 @@ router.post("/oauth/:provider/callback", oauthCallback);
 
 router.get("/oauth/:provider/authorize", oauthAuthorize);
 router.post("/oauth/:provider", oauthLogin);
+
+router.get("/config", getAuthConfig);
 
 router.post("/register", upload.single("avatar"), validate(registerSchema), register);
 router.post("/login", validate(loginSchema), login);

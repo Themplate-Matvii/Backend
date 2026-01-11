@@ -14,6 +14,16 @@ export const messages = {
     tooManyResetRequests: "auth.tooManyResetRequests",
     resetEmailSent: "auth.resetEmailSent",
     passwordChangedSuccess: "auth.passwordChangedSuccess",
+    invalidOneTimeCode: "auth.invalidOneTimeCode",
+    tooManyOtpRequests: "auth.tooManyOtpRequests",
+    providerAlreadyLinked: "auth.providerAlreadyLinked",
+    providerDisabled: "auth.providerDisabled",
+    providerNotLinked: "auth.providerNotLinked",
+    lastProviderRequired: "auth.lastProviderRequired",
+    emailProviderRequired: "auth.emailProviderRequired",
+    passwordAlreadySet: "auth.passwordAlreadySet",
+    passwordNotSet: "auth.passwordNotSet",
+    emailRequired: "auth.emailRequired",
   },
   validation: {
     required: "validation.required",
@@ -34,6 +44,9 @@ export const messages = {
     invalidUrl: "validation.invalidUrl",
     invalidObjectId: "validation.invalidObjectId",
     userRequired: "validation.userRequired",
+    invalidPhone: "validation.invalidPhone",
+    invalidCountry: "validation.invalidCountry",
+    invalidTimezone: "validation.invalidTimezone",
   },
   permissions: {
     forbidden: "permissions.forbidden",
@@ -119,6 +132,27 @@ export const messages = {
         confirmation: "emails.auth.passwordChanged.confirmation",
         footer: "emails.auth.passwordChanged.footer",
         preview: "emails.auth.passwordChanged.preview",
+      },
+      oneTimeCode: {
+        subject: "emails.auth.oneTimeCode.subject",
+        preview: "emails.auth.oneTimeCode.preview",
+        verifyEmailTitle: "emails.auth.oneTimeCode.verifyEmailTitle",
+        verifyEmailSubtitle: "emails.auth.oneTimeCode.verifyEmailSubtitle",
+        linkEmailTitle: "emails.auth.oneTimeCode.linkEmailTitle",
+        linkEmailSubtitle: "emails.auth.oneTimeCode.linkEmailSubtitle",
+        changeEmailTitle: "emails.auth.oneTimeCode.changeEmailTitle",
+        changeEmailSubtitle: "emails.auth.oneTimeCode.changeEmailSubtitle",
+        codeLabel: "emails.auth.oneTimeCode.codeLabel",
+        expiresIn: "emails.auth.oneTimeCode.expiresIn", // {{minutes}}
+        ignore: "emails.auth.oneTimeCode.ignore",
+      },
+      emailChanged: {
+        subject: "emails.auth.emailChanged.subject",
+        title: "emails.auth.emailChanged.title",
+        greeting: "emails.auth.emailChanged.greeting", // {{name}}
+        body: "emails.auth.emailChanged.body", // {{newEmail}}
+        footer: "emails.auth.emailChanged.footer",
+        preview: "emails.auth.emailChanged.preview",
       },
     },
     billing: {

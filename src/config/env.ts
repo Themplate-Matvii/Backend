@@ -72,6 +72,19 @@ export const ENV = {
   APPLE_KEY_ID: process.env.APPLE_KEY_ID || "",
   APPLE_PRIVATE_KEY: process.env.APPLE_PRIVATE_KEY || "",
 
+  // Email/password auth toggle
+  EMAIL_AUTH_ENABLED: process.env.EMAIL_AUTH_ENABLED !== "false",
+
+  // One-time code config
+  OTP_CODE_TTL_MINUTES: Number(process.env.OTP_CODE_TTL_MINUTES) || 10,
+  OTP_RATE_LIMIT_WINDOW_MINUTES:
+    Number(process.env.OTP_RATE_LIMIT_WINDOW_MINUTES) || 60,
+  OTP_RATE_LIMIT_MAX: Number(process.env.OTP_RATE_LIMIT_MAX) || 3,
+
+  // User deletion job
+  USER_DELETION_JOB_INTERVAL_MS:
+    Number(process.env.USER_DELETION_JOB_INTERVAL_MS) || 30000,
+
   /**
    *? Payments
    */

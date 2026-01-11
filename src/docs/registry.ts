@@ -36,6 +36,11 @@ import {
   userSchemas,
   userTags,
 } from '@modules/user/index/user.docs';
+import {
+  accountPaths,
+  accountSchemas,
+  accountTags,
+} from "@modules/user/account/account.docs";
 
 import { landingPaths, landingSchemas, landingTags } from '@modules/landings/landing.docs';
 import {
@@ -59,6 +64,11 @@ export const docsRegistry: DocsBundle[] = [
     paths: userPaths,
     schemas: userSchemas,
     tags: userTags,
+  },
+  {
+    paths: accountPaths,
+    schemas: accountSchemas,
+    tags: accountTags,
   },
 
   // Communication

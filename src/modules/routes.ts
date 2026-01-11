@@ -5,6 +5,7 @@ import { API_CONFIG, apiPath } from '@config/api';
 // Routers
 import authRoutes from '@modules/user/auth/auth.routes';
 import userRoutes from '@modules/user/index/user.routes';
+import accountRoutes from "@modules/user/account/account.routes";
 import emailRoutes from '@modules/communication/email/email.routes';
 import mediaRoutes from '@modules/assets/media/media.routes';
 import paymentRoutes from '@modules/billing/payments/payments.routes';
@@ -19,6 +20,7 @@ import feedbackRoutes from '@modules/communication/feedback/feedback.routes';
 export function registerRoutes(app: Application) {
   app.use(apiPath(API_CONFIG.ROUTES.AUTH), authRoutes);
   app.use(apiPath(API_CONFIG.ROUTES.USER), userRoutes);
+  app.use(apiPath(API_CONFIG.ROUTES.ACCOUNT), accountRoutes);
 
   // Communication
   app.use(apiPath(API_CONFIG.ROUTES.EMAIL), emailRoutes);

@@ -5,6 +5,25 @@ export type SystemTemplateMock = {
 };
 
 export const SYSTEM_TEMPLATE_MOCKS: Record<string, SystemTemplateMock> = {
+  "auth.oneTimeCode": {
+    name: "ONE_TIME_CODE",
+    description: "Sends a one-time verification code for email-based flows.",
+    previewData: {
+      titleKey: "emails.auth.oneTimeCode.verifyEmailTitle",
+      subtitleKey: "emails.auth.oneTimeCode.verifyEmailSubtitle",
+      code: "123456",
+      expiresInMinutes: 10,
+      ignoreKey: "emails.auth.oneTimeCode.ignore",
+    },
+  },
+  "auth.emailChanged": {
+    name: "EMAIL_CHANGED",
+    description: "Notifies that the account email was updated.",
+    previewData: {
+      name: "Alex",
+      newEmail: "new@example.com",
+    },
+  },
   "billing.paymentSucceededOneTime": {
     name: "PAYMENT_SUCCEEDED_ONE_TIME",
     description:
