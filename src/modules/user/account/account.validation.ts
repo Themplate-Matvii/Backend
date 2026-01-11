@@ -31,7 +31,7 @@ const dateSchema = z.preprocess(
     return new Date(String(value));
   },
   z
-    .date({ invalid_type_error: messages.validation.invalidDate })
+    .date({ message: messages.validation.invalidDate })
     .refine((date) => !Number.isNaN(date.getTime()), {
       message: messages.validation.invalidDate,
     }),
