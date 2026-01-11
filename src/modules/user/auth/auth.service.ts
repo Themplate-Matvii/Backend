@@ -374,7 +374,7 @@ export class AuthService {
               ],
             });
 
-            await AuthIdentityModel.create({
+            identity = await AuthIdentityModel.create({
               provider,
               providerId,
               userId: user._id,
@@ -434,24 +434,31 @@ export class AuthService {
 
     if (!identity) {
       try {
-        await AuthIdentityModel.create({
+        identity = await AuthIdentityModel.create({
           provider,
           providerId,
           userId: user._id,
         });
       } catch (error: any) {
+        let handled = false;
         if (error?.code === 11000) {
           const existing = await AuthIdentityModel.findOne({
             provider,
             providerId,
           });
-          if (existing && String(existing.userId) !== String(user._id)) {
-            throw new AppError(messages.auth.providerAlreadyLinked, 409, {
-              provider,
-            });
+          if (existing) {
+            if (String(existing.userId) !== String(user._id)) {
+              throw new AppError(messages.auth.providerAlreadyLinked, 409, {
+                provider,
+              });
+            }
+            identity = existing;
+            handled = true;
           }
         }
-        throw error;
+        if (!handled) {
+          throw error;
+        }
       }
     }
 
