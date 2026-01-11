@@ -18,7 +18,7 @@ export class GoogleAuthProvider extends AuthProvider {
     const client: OAuthClient = {
       clientId: ENV.GOOGLE_CLIENT_ID,
       clientSecret: ENV.GOOGLE_CLIENT_SECRET,
-      redirectUri: ENV.OAUTH_REDIRECT_BASE_URL,
+      redirectUri: `${ENV.OAUTH_REDIRECT_BASE_URL}/google/callback`,
       defaultScopes: ["openid", "email", "profile"],
       supportsPKCE: true,
     };
