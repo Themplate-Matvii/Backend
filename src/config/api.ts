@@ -13,6 +13,7 @@ export const API_CONFIG = {
     // User
     AUTH: "/auth",
     USER: "/users",
+    ACCOUNT: "/account",
 
     // Payment
     PRICING: "/pricing",

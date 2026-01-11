@@ -13,7 +13,17 @@
     "passwordResetUnavailableForOAuth": "Password reset is not available for accounts created via Google or other providers.",
     "tooManyResetRequests": "Too many password reset requests. Please try again later.",
     "resetEmailSent": "A password reset link has been sent to your email.",
-    "passwordChangedSuccess": "Your password has been changed successfully."
+    "passwordChangedSuccess": "Your password has been changed successfully.",
+    "invalidOneTimeCode": "Invalid or expired verification code",
+    "tooManyOtpRequests": "Too many verification codes requested. Please try again later.",
+    "providerAlreadyLinked": "This provider is already linked to another account.",
+    "providerDisabled": "This authentication provider is not enabled.",
+    "providerNotLinked": "This provider is not linked to your account.",
+    "lastProviderRequired": "You must keep at least one login method connected.",
+    "emailProviderRequired": "Email provider is required for this action.",
+    "passwordAlreadySet": "Password is already set for this account.",
+    "passwordNotSet": "Password is not set for this account.",
+    "emailRequired": "Email address is required for this action."
   },
   "validation": {
     "invalidDate": "Invalid date",
@@ -33,7 +43,10 @@
     "nameTooLong": "Name must be at most {{max}} characters long",
     "invalidUrl": "Invalid URL",
     "invalidObjectId": "Invalid object identifier",
-    "userRequired": "User is required to perform this action"
+    "userRequired": "User is required to perform this action",
+    "invalidPhone": "Invalid phone number",
+    "invalidCountry": "Invalid country code",
+    "invalidTimezone": "Invalid timezone"
   },
   "permissions": {
     "forbidden": "You do not have permission to perform this action",
@@ -120,6 +133,27 @@
         "confirmation": "We’ve updated your password and secured your account.",
         "footer": "If you didn’t make this change, reset your password immediately or contact support.",
         "preview": "Your password was changed. No action required if this was you."
+      },
+      "oneTimeCode": {
+        "subject": "Your verification code",
+        "preview": "Use this one-time code to continue your request.",
+        "verifyEmailTitle": "Verify your email",
+        "verifyEmailSubtitle": "Use the code below to confirm your email address.",
+        "linkEmailTitle": "Add email login",
+        "linkEmailSubtitle": "Use the code below to link this email to your account.",
+        "changeEmailTitle": "Confirm your new email",
+        "changeEmailSubtitle": "Use the code below to finish updating your email.",
+        "codeLabel": "Verification code",
+        "expiresIn": "Expires in {{minutes}} minutes.",
+        "ignore": "If you didn’t request this, you can ignore this email."
+      },
+      "emailChanged": {
+        "subject": "Your email was changed",
+        "title": "Email updated",
+        "greeting": "Hi, {{name}}!",
+        "body": "Your account email has been changed to {{newEmail}}.",
+        "footer": "If you didn’t make this change, contact support immediately.",
+        "preview": "Your account email has been updated."
       }
     },
     "billing": {

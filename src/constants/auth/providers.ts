@@ -2,7 +2,7 @@
 
 // Supported auth provider keys
 export const AUTH_PROVIDER_KEYS = [
-  "local",
+  "email",
   "google",
   "github",
   "apple",
@@ -11,7 +11,7 @@ export const AUTH_PROVIDER_KEYS = [
 export type AuthProviderKey = (typeof AUTH_PROVIDER_KEYS)[number];
 
 // Distinguish between local login, OpenID Connect and plain OAuth2
-export type ProviderKind = "local" | "oidc" | "oauth2";
+export type ProviderKind = "email" | "oidc" | "oauth2";
 
 export interface AuthProviderMeta {
   key: AuthProviderKey;
@@ -22,10 +22,10 @@ export interface AuthProviderMeta {
 }
 
 export const AUTH_PROVIDERS: Record<AuthProviderKey, AuthProviderMeta> = {
-  local: {
-    key: "local",
+  email: {
+    key: "email",
     title: "Email & Password",
-    kind: "local",
+    kind: "email",
     mayOmitEmail: false,
     requireVerifiedEmailToLink: false,
   },

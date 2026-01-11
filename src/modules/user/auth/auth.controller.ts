@@ -17,6 +17,10 @@ import { isAuthProviderKey } from "@constants/auth/providers";
 import { AppError } from "@utils/common/appError";
 import { messages } from "@constants/messages";
 import { successResponse } from "@utils/common/response";
+import {
+  getEnabledAuthProviders,
+  getOAuthClientConfig,
+} from "@modules/user/auth/auth.config";
 
 const authService = new AuthService();
 
@@ -25,7 +29,7 @@ const authService = new AuthService();
 // GET or POST /api/auth/oauth/:provider/callback
 export const oauthCallback = asyncHandler<Request>(async (req, res) => {
   const { provider } = req.params;
-  if (!isAuthProviderKey(provider) || provider === "local") {
+  if (!isAuthProviderKey(provider) || provider === "email") {
     throw new AppError(messages.auth.invalidProvider, 400);
   }
 
@@ -66,7 +70,7 @@ export const oauthCallback = asyncHandler<Request>(async (req, res) => {
 // GET /api/auth/oauth/:provider/authorize
 export const oauthAuthorize = asyncHandler<Request>(async (req, res) => {
   const { provider } = req.params;
-  if (!isAuthProviderKey(provider) || provider === "local") {
+  if (!isAuthProviderKey(provider) || provider === "email") {
     throw new AppError(messages.auth.invalidProvider, 400);
   }
 
@@ -88,7 +92,7 @@ export const oauthAuthorize = asyncHandler<Request>(async (req, res) => {
 // POST /api/auth/oauth/:provider
 export const oauthLogin = asyncHandler<RequestWithUser>(async (req, res) => {
   const { provider } = req.params;
-  if (!isAuthProviderKey(provider) || provider === "local") {
+  if (!isAuthProviderKey(provider) || provider === "email") {
     throw new AppError(messages.auth.invalidProvider, 400);
   }
 
@@ -180,4 +184,10 @@ export const resetPassword = asyncHandler<Request>(async (req, res) => {
       ? req.t(messages.auth.passwordChangedSuccess)
       : messages.auth.passwordChangedSuccess,
   );
+});
+
+export const getAuthConfig = asyncHandler<Request>(async (_req, res) => {
+  const enabledProviders = getEnabledAuthProviders();
+  const oauth = getOAuthClientConfig();
+  res.status(200).json({ enabledProviders, oauth });
 });
