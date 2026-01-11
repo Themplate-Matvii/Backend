@@ -15,7 +15,7 @@ export class GithubAuthProvider extends AuthProvider {
     const client: OAuthClient = {
       clientId: ENV.GITHUB_CLIENT_ID,
       clientSecret: ENV.GITHUB_CLIENT_SECRET,
-      redirectUri: ENV.OAUTH_REDIRECT_BASE_URL,
+      redirectUri: `${ENV.OAUTH_REDIRECT_BASE_URL}/github/callback`,
       defaultScopes: ["read:user", "user:email"], // user:email to fetch primary email if public email is null
       supportsPKCE: true,
     };
