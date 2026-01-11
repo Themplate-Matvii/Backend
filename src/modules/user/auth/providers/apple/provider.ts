@@ -25,7 +25,7 @@ export class AppleAuthProvider extends AuthProvider {
         privateKey: (ENV.APPLE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
         expiresIn: "180d",
       }),
-      redirectUri: ENV.OAUTH_REDIRECT_BASE_URL,
+      redirectUri: `${ENV.OAUTH_REDIRECT_BASE_URL}/apple/callback`,
       defaultScopes: ["openid", "email", "name"],
       supportsPKCE: true,
     };
