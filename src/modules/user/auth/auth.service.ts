@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { Response } from "express";
+import { Types } from "mongoose";
 import { RequestWithUser } from "@modules/core/types/auth";
 import { User, UserModel } from "@modules/user/user.model";
 import { comparePassword, hashPassword } from "@utils/auth/hash";
@@ -120,6 +121,10 @@ function shouldImportAvatar(avatar: User["avatar"], incomingUrl?: string) {
   if (isObjectIdString) return false;
 
   return true;
+}
+
+function isObjectIdString(value?: string) {
+  return typeof value === "string" && Types.ObjectId.isValid(value);
 }
 
 /* ---------------------------- service --------------------------- */
@@ -463,7 +468,9 @@ export class AuthService {
     }
 
     if (!user.name && name) user.name = name;
-    if (!user.avatar && avatar) user.avatar = avatar;
+    if (!user.avatar && avatar && isObjectIdString(avatar)) {
+      user.avatar = avatar;
+    }
     if (!user.email && email) {
       user.email = email;
     }
