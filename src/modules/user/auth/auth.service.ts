@@ -273,6 +273,12 @@ export class AuthService {
     const meta = getProviderMeta(provider);
     const requireVerified = meta.requireVerifiedEmailToLink;
 
+    if (!providerId) {
+      throw new AppError(messages.auth.invalidToken, 400, {
+        reason: "missing_provider_id",
+      });
+    }
+
     let user: User | null = null;
     let identity = await AuthIdentityModel.findOne({
       provider,
@@ -346,32 +352,58 @@ export class AuthService {
             throw new AppError(messages.auth.forbidden, 401);
           }
 
-          user = await UserModel.create({
-            email,
-            emailVerified: Boolean(emailVerified),
-            emailVerifiedAt: emailVerified ? new Date() : undefined,
-            name,
-            role: "user",
-            settings: {
-              locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
-              theme,
-            },
-            authProviders: [
-              {
-                provider: provider as any,
-                providerId,
-                email,
-                addedAt: new Date(),
-                lastUsedAt: new Date(),
+          try {
+            user = await UserModel.create({
+              email,
+              emailVerified: Boolean(emailVerified),
+              emailVerifiedAt: emailVerified ? new Date() : undefined,
+              name,
+              role: "user",
+              settings: {
+                locale: locale || req.lang || ENV.DEFAULT_LANGUAGE,
+                theme,
               },
-            ],
-          });
+              authProviders: [
+                {
+                  provider: provider as any,
+                  providerId,
+                  email,
+                  addedAt: new Date(),
+                  lastUsedAt: new Date(),
+                },
+              ],
+            });
 
-          await AuthIdentityModel.create({
-            provider,
-            providerId,
-            userId: user._id,
-          });
+            await AuthIdentityModel.create({
+              provider,
+              providerId,
+              userId: user._id,
+            });
+          } catch (error: any) {
+            if (error?.code === 11000 && email) {
+              const existing = await UserModel.findOne({ email });
+              if (existing) {
+                const hasLocal =
+                  !!existing.passwordHash ||
+                  !!existing.password ||
+                  existing.authProviders.some((p: any) => p.provider === "email");
+
+                if (hasLocal) {
+                  throw new AppError(messages.auth.emailUsed, 409, { email });
+                }
+
+                user = existing;
+                identity = await AuthIdentityModel.findOne({
+                  provider,
+                  providerId,
+                });
+              }
+            }
+
+            if (!user) {
+              throw error;
+            }
+          }
         }
       }
     }
@@ -400,12 +432,27 @@ export class AuthService {
       if (!linked.email && email) linked.email = email;
     }
 
-    if (!identity && providerId) {
-      await AuthIdentityModel.create({
-        provider,
-        providerId,
-        userId: user._id,
-      });
+    if (!identity) {
+      try {
+        await AuthIdentityModel.create({
+          provider,
+          providerId,
+          userId: user._id,
+        });
+      } catch (error: any) {
+        if (error?.code === 11000) {
+          const existing = await AuthIdentityModel.findOne({
+            provider,
+            providerId,
+          });
+          if (existing && String(existing.userId) !== String(user._id)) {
+            throw new AppError(messages.auth.providerAlreadyLinked, 409, {
+              provider,
+            });
+          }
+        }
+        throw error;
+      }
     }
 
     if (!user.name && name) user.name = name;
