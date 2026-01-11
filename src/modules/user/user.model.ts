@@ -8,14 +8,24 @@ import {
 import { applyDefaultSchemaTransform } from "@utils/database/transform";
 
 export interface AuthProvider {
-  provider: string; // e.g. "local", "google", "apple"
-  providerId: string; // e.g. email for local or sub/id from OAuth
+  provider: "email" | "google" | "apple" | "github";
+  providerId?: string;
+  email?: string;
+  addedAt: Date;
+  lastUsedAt?: Date;
 }
 
 export interface User extends Document {
   _id: string;
   email: string;
-  password?: string;
+  emailVerified: boolean;
+  emailVerifiedAt?: Date;
+  birthday?: Date;
+  phone?: string;
+  country?: string;
+  timezone?: string;
+  passwordHash?: string | null;
+  password?: string | null;
   role: RoleKey;
   plan?: PlanKey | null;
   name?: string | null;
@@ -31,7 +41,10 @@ export interface User extends Document {
 const AuthProviderSchema = new Schema<AuthProvider>(
   {
     provider: { type: String, required: true },
-    providerId: { type: String, required: true },
+    providerId: { type: String, required: false },
+    email: { type: String, required: false },
+    addedAt: { type: Date, default: () => new Date() },
+    lastUsedAt: { type: Date, required: false },
   },
   { _id: false },
 );
@@ -46,6 +59,13 @@ const UserSchema = new Schema<User>(
       trim: true,
       index: true,
     },
+    emailVerified: { type: Boolean, default: false },
+    emailVerifiedAt: { type: Date, required: false },
+    birthday: { type: Date, required: false },
+    phone: { type: String, required: false },
+    country: { type: String, required: false },
+    timezone: { type: String, required: false },
+    passwordHash: { type: String, required: false, default: null },
     password: { type: String, required: false },
     role: {
       type: String,
@@ -65,6 +85,8 @@ const UserSchema = new Schema<User>(
   },
 );
 
-applyDefaultSchemaTransform(UserSchema, { removeFields: ["password"] });
+applyDefaultSchemaTransform(UserSchema, {
+  removeFields: ["password", "passwordHash"],
+});
 
 export const UserModel = model<User>("User", UserSchema, "users");

@@ -8,6 +8,9 @@ export const mediaSchemas = {
     properties: {
       id: { type: "string", example: "677fd83d9d2b8f2c44f3fe99" },
       filename: { type: "string", example: "7d4c82fa-8477-4d89-a234.jpg" },
+      storageProvider: { type: "string", example: "b2" },
+      bucket: { type: "string", example: "themplate-assets" },
+      objectKey: { type: "string", example: "7d4c82fa-8477-4d89-a234.jpg" },
       uploadedBy: {
         type: "object",
         properties: {
@@ -24,6 +27,7 @@ export const mediaSchemas = {
         example: "Main hero section background for landing page",
       },
       createdAt: { type: "string", format: "date-time" },
+      status: { type: "string", example: "active" },
       url: {
         type: "string",
         example:
