@@ -11,6 +11,7 @@ import { getEnabledAuthProviders } from "@modules/user/auth/auth.config";
 import { comparePassword, hashPassword } from "@utils/auth/hash";
 import { UserDeletionJobModel } from "@modules/user/account/userDeletionJob.model";
 import { deleteUserAuthData } from "@modules/user/account/userDeletion.service";
+import { AuthIdentityModel } from "@modules/user/auth/authIdentity.model";
 
 export class AccountService {
   async getMe(userId: string) {
