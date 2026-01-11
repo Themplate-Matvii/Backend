@@ -5,12 +5,12 @@ import { OneTimeCodeService } from "@modules/user/account/oneTimeCode.service";
 import { EmailService } from "@modules/communication/email/email.service";
 import { emailTemplates } from "@modules/communication/email/email.templates";
 import { ENV } from "@config/env";
-import { AuthIdentityModel } from "@modules/user/auth/authIdentity.model";
 import { RefreshSessionModel } from "@modules/user/auth/refreshSession.model";
 import { getAuthProvider } from "@modules/user/auth/providers";
 import { getEnabledAuthProviders } from "@modules/user/auth/auth.config";
 import { comparePassword, hashPassword } from "@utils/auth/hash";
 import { UserDeletionJobModel } from "@modules/user/account/userDeletionJob.model";
+import { deleteUserAuthData } from "@modules/user/account/userDeletion.service";
 
 export class AccountService {
   async getMe(userId: string) {
@@ -505,6 +505,6 @@ export class AccountService {
       nextRunAt: new Date(),
     });
 
-    await RefreshSessionModel.deleteMany({ userId });
+    await deleteUserAuthData(userId);
   }
 }
