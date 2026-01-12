@@ -93,26 +93,32 @@ export const emailSchemas = {
     type: "object",
     properties: {
       brandName: { type: "string" },
-      logoUrl: { type: "string", nullable: true },
-      darkLogoUrl: { type: "string", nullable: true },
+      logoMediaId: { type: "string", nullable: true },
+      darkLogoMediaId: { type: "string", nullable: true },
+      logoMedia: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string" },
+          url: { type: "string" },
+        },
+      },
+      darkLogoMedia: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string" },
+          url: { type: "string" },
+        },
+      },
       primaryColor: { type: "string" },
       secondaryColor: { type: "string" },
       accentColor: { type: "string" },
       backgroundColor: { type: "string" },
       textColor: { type: "string" },
-      footerText: { type: "string" },
       supportEmail: { type: "string" },
-      supportUrl: { type: "string" },
-      socialLinks: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            label: { type: "string" },
-            url: { type: "string" },
-          },
-        },
-      },
+      headerHtml: { type: "string" },
+      footerHtml: { type: "string" },
     },
   },
 
@@ -134,8 +140,9 @@ export const emailSchemas = {
         type: "string",
         enum: ["transactional", "marketing", "billing"],
       },
-      subjectKey: { type: "string" },
-      previewTextKey: { type: "string" },
+      subject: { type: "string" },
+      previewText: { type: "string" },
+      group: { type: "string", example: "auth" },
       previewData: {
         type: "object",
         additionalProperties: true,
@@ -216,6 +223,21 @@ export const emailSchemas = {
   MarketingPreviewRequest: {
     type: "object",
     properties: {
+      data: { type: "object", additionalProperties: true },
+      locale: { type: "string", example: "en" },
+    },
+  },
+
+  MarketingDraftPreviewRequest: {
+    type: "object",
+    required: ["name", "subjectKey", "translations", "hbs"],
+    properties: {
+      name: { type: "string" },
+      description: { type: "string" },
+      subjectKey: { type: "string" },
+      translations: { type: "object", additionalProperties: true },
+      hbs: { type: "string" },
+      previewData: { type: "object", additionalProperties: true },
       data: { type: "object", additionalProperties: true },
       locale: { type: "string", example: "en" },
     },
@@ -405,6 +427,22 @@ export const emailPaths = {
         content: {
           "application/json": {
             schema: { $ref: "#/components/schemas/MarketingPreviewRequest" },
+          },
+        },
+      },
+      responses: { "200": { description: "Preview rendered" } },
+    },
+  },
+
+  [apiPath(`${API_CONFIG.ROUTES.EMAIL}/marketing/preview`)]: {
+    post: {
+      tags: ["Email"],
+      summary: "Preview marketing template draft",
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/MarketingDraftPreviewRequest" },
           },
         },
       },
