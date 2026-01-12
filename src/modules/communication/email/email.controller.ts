@@ -4,6 +4,7 @@ import { EmailService, DEFAULT_EMAIL_BRANDING, SendEmailOptions } from "@modules
 import {
   BroadcastEmailDTO,
   CreateMarketingTemplateDTO,
+  MarketingDraftPreviewDTO,
   MarketingPreviewDTO,
   MarketingPreviewParamsDTO,
   MarketingTemplateParamsDTO,
@@ -15,17 +16,19 @@ import {
   UnsubscribeParamsDTO,
 } from "@modules/communication/email/email.validation";
 import { ENV } from "@config/env";
+import { initI18n, i18n } from "@config/i18n";
 import { successResponse } from "@utils/common/response";
 import { UserModel } from "@modules/user/user.model";
 import { MarketingEmailModel } from "@modules/communication/email/marketingEmail.model";
 import { emailTemplates, EmailTemplateDefinition } from "@modules/communication/email/email.templates";
-import { EmailBrandingModel, getActiveBranding } from "@modules/communication/email/email.branding.model";
-import { EmailCategory } from "@modules/communication/email/email.types";
+import { EmailBrandingModel, EmailBrandingDocument, getActiveBranding } from "@modules/communication/email/email.branding.model";
+import { EmailBrandingPayload, EmailCategory } from "@modules/communication/email/email.types";
 import { verifyUnsubscribeToken } from "@modules/communication/email/unsubscribeTokens";
 import { AppError } from "@utils/common/appError";
 import { resolveUserId } from "@utils/auth/resolveUserId";
 import { RequestWithUser } from "@modules/core/types/auth";
 import { SYSTEM_TEMPLATE_MOCKS } from "./email.previewData";
+import Media from "@modules/assets/media/media.model";
 
 function findSystemTemplate(templatePath: string): (EmailTemplateDefinition & { key: string }) | null {
   for (const [group, templates] of Object.entries(emailTemplates)) {
@@ -45,6 +48,58 @@ function ensureRecipient(body: SendEmailDTO) {
   if (!body.to && !body.userId) {
     throw new AppError("Recipient email or userId is required", 400);
   }
+}
+
+type BrandingResponse = EmailBrandingPayload & {
+  logoMedia: { id: string; url: string } | null;
+  darkLogoMedia: { id: string; url: string } | null;
+  headerHtml: string;
+  footerHtml: string;
+};
+
+async function buildBrandingResponse(
+  branding: EmailBrandingPayload | EmailBrandingDocument,
+): Promise<BrandingResponse> {
+  const logoMediaId = branding.logoMediaId ? String(branding.logoMediaId) : null;
+  const darkLogoMediaId = branding.darkLogoMediaId
+    ? String(branding.darkLogoMediaId)
+    : null;
+  const mediaIds = [logoMediaId, darkLogoMediaId].filter(Boolean) as string[];
+  const mediaItems = mediaIds.length
+    ? await Media.find({ _id: { $in: mediaIds } }, "url").lean()
+    : [];
+  const mediaMap = new Map(
+    mediaItems.map((item) => [String(item._id), item.url] as const),
+  );
+  const logoUrl = logoMediaId ? mediaMap.get(logoMediaId) ?? null : null;
+  const darkLogoUrl = darkLogoMediaId
+    ? mediaMap.get(darkLogoMediaId) ?? null
+    : null;
+
+  const resolvedBranding: EmailBrandingPayload = {
+    brandName: branding.brandName ?? DEFAULT_EMAIL_BRANDING.brandName,
+    logoMediaId,
+    darkLogoMediaId,
+    logoUrl,
+    darkLogoUrl,
+    primaryColor: branding.primaryColor || DEFAULT_EMAIL_BRANDING.primaryColor,
+    secondaryColor: branding.secondaryColor || DEFAULT_EMAIL_BRANDING.secondaryColor,
+    accentColor: branding.accentColor || DEFAULT_EMAIL_BRANDING.accentColor,
+    backgroundColor: branding.backgroundColor || DEFAULT_EMAIL_BRANDING.backgroundColor,
+    textColor: branding.textColor || DEFAULT_EMAIL_BRANDING.textColor,
+    supportEmail: branding.supportEmail ?? DEFAULT_EMAIL_BRANDING.supportEmail,
+  };
+
+  const preview = EmailService.buildBrandingPreview(resolvedBranding);
+
+  return {
+    ...resolvedBranding,
+    logoMedia: logoMediaId && logoUrl ? { id: logoMediaId, url: logoUrl } : null,
+    darkLogoMedia:
+      darkLogoMediaId && darkLogoUrl ? { id: darkLogoMediaId, url: darkLogoUrl } : null,
+    headerHtml: preview.headerHtml,
+    footerHtml: preview.footerHtml,
+  };
 }
 
 /**
@@ -173,7 +228,8 @@ export const broadcastEmail = asyncHandler<Request>(async (req, res) => {
 /** Branding **/
 export const getBranding = asyncHandler<Request>(async (_req, res) => {
   const branding = (await getActiveBranding()) || DEFAULT_EMAIL_BRANDING;
-  return successResponse(res, branding);
+  const response = await buildBrandingResponse(branding);
+  return successResponse(res, response);
 });
 
 export const updateBranding = asyncHandler<RequestWithUser>(async (req, res) => {
@@ -186,7 +242,8 @@ export const updateBranding = asyncHandler<RequestWithUser>(async (req, res) => 
     { new: true, upsert: true },
   );
 
-  return successResponse(res, branding);
+  const response = await buildBrandingResponse(branding);
+  return successResponse(res, response);
 });
 
 /** Marketing templates CRUD **/
@@ -271,6 +328,28 @@ export const previewMarketingTemplate = asyncHandler<Request>(async (req, res) =
   return successResponse(res, preview);
 });
 
+export const previewMarketingDraft = asyncHandler<Request>(async (req, res) => {
+  const body = req.body as MarketingDraftPreviewDTO;
+
+  const preview = await EmailService.preview({
+    templateKind: "marketing",
+    marketingTemplate: {
+      name: body.name,
+      description: body.description,
+      subjectKey: body.subjectKey,
+      translations: body.translations,
+      hbs: body.hbs,
+      previewData: body.previewData,
+    } as any,
+    to: body.data?.email || ENV.ADMIN_EMAIL,
+    data: body.data ?? body.previewData ?? {},
+    locale: body.locale,
+    category: EmailCategory.MARKETING,
+  } as SendEmailOptions);
+
+  return successResponse(res, preview);
+});
+
 export const previewSystemTemplate = asyncHandler<Request>(async (req, res) => {
   const body = req.body as TemplatePreviewDTO;
   const template = findSystemTemplate(body.template);
@@ -292,8 +371,16 @@ export const previewSystemTemplate = asyncHandler<Request>(async (req, res) => {
 });
 
 /** Templates overview **/
-export const listAllTemplates = asyncHandler<Request>(async (_req, res) => {
+export const listAllTemplates = asyncHandler<Request>(async (req, res) => {
+  const locale =
+    (typeof req.query.locale === "string" && req.query.locale) ||
+    ENV.DEFAULT_LANGUAGE;
+
+  await initI18n();
+  await i18n.changeLanguage(locale);
+
   const branding = (await getActiveBranding()) || DEFAULT_EMAIL_BRANDING;
+  const brandingResponse = await buildBrandingResponse(branding);
 
   const systemTemplates = Object.entries(emailTemplates).flatMap(
     ([group, templates]) =>
@@ -302,13 +389,23 @@ export const listAllTemplates = asyncHandler<Request>(async (_req, res) => {
           const fullKey = `${group}.${key}`;
           const mock = SYSTEM_TEMPLATE_MOCKS[fullKey];
 
+          const previewData = mock?.previewData ?? {};
+          const subject = i18n.t(value.subjectKey, previewData) as string;
+          const previewText = value.previewTextKey
+            ? (i18n.t(value.previewTextKey, previewData) as string)
+            : undefined;
+
           return {
             key: fullKey,
-            ...value,
+            file: value.file,
+            category: value.category,
             type: "system",
             name: mock?.name,
             description: mock?.description,
             previewData: mock?.previewData,
+            subject,
+            previewText,
+            group,
           };
         },
       ),
@@ -328,7 +425,7 @@ export const listAllTemplates = asyncHandler<Request>(async (_req, res) => {
   }));
 
   return successResponse(res, {
-    branding,
+    branding: brandingResponse,
     systemTemplates,
     marketingTemplates,
   });

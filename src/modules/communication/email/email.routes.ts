@@ -7,6 +7,7 @@ import {
   getUnsubscribePreferences,
   listAllTemplates,
   listMarketingTemplates,
+  previewMarketingDraft,
   previewMarketingTemplate,
   previewSystemTemplate,
   sendEmail,
@@ -18,6 +19,7 @@ import { validate } from "@middleware/validate";
 import {
   broadcastEmailSchema,
   createMarketingTemplateSchema,
+  marketingDraftPreviewSchema,
   marketingPreviewSchema,
   sendEmailSchema,
   templatePreviewSchema,
@@ -84,6 +86,14 @@ router.post(
   checkPermission({ any: permissionKeys.email.templates.manage }),
   validate(createMarketingTemplateSchema),
   createMarketingTemplate,
+);
+
+router.post(
+  "/marketing/preview",
+  requireJwt,
+  checkPermission({ any: permissionKeys.email.templates.view }),
+  validate(marketingDraftPreviewSchema),
+  previewMarketingDraft,
 );
 
 router.get(

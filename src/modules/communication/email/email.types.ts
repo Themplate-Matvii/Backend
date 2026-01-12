@@ -13,6 +13,8 @@ export interface UnsubscribeTokenPayload {
 
 export interface EmailBrandingPayload {
   brandName: string;
+  logoMediaId?: string | null;
+  darkLogoMediaId?: string | null;
   logoUrl?: string | null;
   darkLogoUrl?: string | null;
   primaryColor: string;
@@ -20,8 +22,5 @@ export interface EmailBrandingPayload {
   accentColor: string;
   backgroundColor: string;
   textColor: string;
-  footerText?: string | null;
   supportEmail?: string | null;
-  supportUrl?: string | null;
-  socialLinks?: Array<{ label: string; url: string }>;
 }
