@@ -6,6 +6,7 @@ import { initI18n, i18n, LangEnum } from "@config/i18n";
 import { ENV } from "@config/env";
 import { UserModel } from "@modules/user/user.model";
 import { EmailBrandingDocument, getActiveBranding } from "./email.branding.model";
+import Media from "@modules/assets/media/media.model";
 import { MarketingEmailDocument } from "./marketingEmail.model";
 import { EmailBrandingPayload, EmailCategory } from "./email.types";
 import { signUnsubscribeToken } from "./unsubscribeTokens";
@@ -46,6 +47,8 @@ export type SendEmailResult = {
 
 export const DEFAULT_EMAIL_BRANDING: EmailBrandingPayload = {
   brandName: "Themplate",
+  logoMediaId: null,
+  darkLogoMediaId: null,
   logoUrl: null,
   darkLogoUrl: null,
   primaryColor: "#2563eb",
@@ -53,10 +56,7 @@ export const DEFAULT_EMAIL_BRANDING: EmailBrandingPayload = {
   accentColor: "#0ea5e9",
   backgroundColor: "#0f172a",
   textColor: "#0b1220",
-  footerText: "Thank you for trusting us to power your work.",
   supportEmail: ENV.ADMIN_EMAIL,
-  supportUrl: ENV.FRONT_URL,
-  socialLinks: [],
 };
 
 function buildDefaultPreferences(): EmailPreferences {
@@ -117,19 +117,30 @@ export class EmailService {
     const doc: EmailBrandingDocument | null = await getActiveBranding();
     if (!doc) return DEFAULT_EMAIL_BRANDING;
 
+    const mediaIds = [doc.logoMediaId, doc.darkLogoMediaId].filter(Boolean);
+    const mediaItems = mediaIds.length
+      ? await Media.find({ _id: { $in: mediaIds } }, "url").lean()
+      : [];
+    const mediaMap = new Map(
+      mediaItems.map((item) => [String(item._id), item.url] as const),
+    );
+
     return {
       brandName: doc.brandName ?? DEFAULT_EMAIL_BRANDING.brandName,
-      logoUrl: doc.logoUrl ?? DEFAULT_EMAIL_BRANDING.logoUrl,
-      darkLogoUrl: doc.darkLogoUrl ?? DEFAULT_EMAIL_BRANDING.darkLogoUrl,
+      logoMediaId: doc.logoMediaId ? String(doc.logoMediaId) : null,
+      darkLogoMediaId: doc.darkLogoMediaId ? String(doc.darkLogoMediaId) : null,
+      logoUrl:
+        (doc.logoMediaId && mediaMap.get(String(doc.logoMediaId))) ||
+        DEFAULT_EMAIL_BRANDING.logoUrl,
+      darkLogoUrl:
+        (doc.darkLogoMediaId && mediaMap.get(String(doc.darkLogoMediaId))) ||
+        DEFAULT_EMAIL_BRANDING.darkLogoUrl,
       primaryColor: doc.primaryColor || DEFAULT_EMAIL_BRANDING.primaryColor,
       secondaryColor: doc.secondaryColor || DEFAULT_EMAIL_BRANDING.secondaryColor,
       accentColor: doc.accentColor || DEFAULT_EMAIL_BRANDING.accentColor,
       backgroundColor: doc.backgroundColor || DEFAULT_EMAIL_BRANDING.backgroundColor,
       textColor: doc.textColor || DEFAULT_EMAIL_BRANDING.textColor,
-      footerText: doc.footerText ?? DEFAULT_EMAIL_BRANDING.footerText,
       supportEmail: doc.supportEmail ?? DEFAULT_EMAIL_BRANDING.supportEmail,
-      supportUrl: doc.supportUrl ?? DEFAULT_EMAIL_BRANDING.supportUrl,
-      socialLinks: doc.socialLinks?.length ? doc.socialLinks : DEFAULT_EMAIL_BRANDING.socialLinks,
     };
   }
 
@@ -243,13 +254,7 @@ export class EmailService {
     const textColor = branding.textColor || "#0b1220";
     const background = branding.backgroundColor || "#0f172a";
     const primary = branding.primaryColor || "#2563eb";
-
-    const socialLinks = (branding.socialLinks || [])
-      .map(
-        (link) =>
-          `<a href="${link.url}" style="color:${accent}; text-decoration:none; margin-right:12px; font-weight:600;">${link.label}</a>`,
-      )
-      .join("");
+    const headerLogo = branding.darkLogoUrl || branding.logoUrl;
 
     const unsubBlock = unsubscribeUrl
       ? `<p style="color:#6b7280; font-size:13px; margin: 8px 0 0;">
@@ -284,13 +289,13 @@ export class EmailService {
                   <tr>
                     <td style="padding:12px 20px; background:#0f172a; border-radius:16px; color:#e5e7eb; display:flex; align-items:center; gap:12px;">
                       ${
-                        branding.logoUrl
-                          ? `<img src="${branding.logoUrl}" alt="${branding.brandName}" style="height:36px; width:auto; display:block;" />`
+                        headerLogo
+                          ? `<img src="${headerLogo}" alt="${branding.brandName}" style="height:36px; width:auto; display:block;" />`
                           : `<div style="width:42px; height:42px; border-radius:12px; background:${accent}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800;">${branding.brandName?.[0] ?? "T"}</div>`
                       }
                       <div>
                         <div style="font-weight:800; font-size:16px; color:#e5e7eb;">${branding.brandName}</div>
-                        <div style="font-size:13px; color:#cbd5e1;">Modern communication for your SaaS customers</div>
+                        <div style="font-size:13px; color:#cbd5e1;">Official updates from ${branding.brandName}</div>
                       </div>
                     </td>
                   </tr>
@@ -306,10 +311,8 @@ export class EmailService {
             </tr>
             <tr>
               <td style="padding:18px 12px 0; text-align:center;">
-                <p style="margin:0; color:#e5e7eb; font-size:13px;">${branding.footerText ?? ""}</p>
-                ${branding.supportEmail ? `<p style="margin:6px 0 0; color:#cbd5e1; font-size:13px;">Need help? <a href="mailto:${branding.supportEmail}" style="color:${accent}; text-decoration:none; font-weight:600;">${branding.supportEmail}</a></p>` : ""}
-                ${branding.supportUrl ? `<p style="margin:6px 0 0; color:#cbd5e1; font-size:13px;"><a href="${branding.supportUrl}" style="color:${accent}; text-decoration:none; font-weight:600;">Visit dashboard</a></p>` : ""}
-                ${socialLinks ? `<p style="margin:8px 0 0;">${socialLinks}</p>` : ""}
+                <p style="margin:0; color:#e5e7eb; font-size:13px;">You're receiving this email from ${branding.brandName}.</p>
+                ${branding.supportEmail ? `<p style="margin:6px 0 0; color:#cbd5e1; font-size:13px;">Questions? <a href="mailto:${branding.supportEmail}" style="color:${accent}; text-decoration:none; font-weight:600;">${branding.supportEmail}</a></p>` : ""}
                 ${unsubBlock}
               </td>
             </tr>
@@ -319,6 +322,41 @@ export class EmailService {
     </table>
   </body>
 </html>`;
+  }
+
+  static buildBrandingPreview(branding: EmailBrandingPayload) {
+    const accent = branding.accentColor || branding.primaryColor;
+    const background = branding.backgroundColor || "#0f172a";
+    const headerLogo = branding.darkLogoUrl || branding.logoUrl;
+
+    const headerHtml = `
+      <div style="background:${background}; padding:20px; border-radius:18px;">
+        <div style="padding:12px 20px; background:#0f172a; border-radius:16px; color:#e5e7eb; display:flex; align-items:center; gap:12px;">
+          ${
+            headerLogo
+              ? `<img src="${headerLogo}" alt="${branding.brandName}" style="height:36px; width:auto; display:block;" />`
+              : `<div style="width:42px; height:42px; border-radius:12px; background:${accent}; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800;">${branding.brandName?.[0] ?? "T"}</div>`
+          }
+          <div>
+            <div style="font-weight:800; font-size:16px; color:#e5e7eb;">${branding.brandName}</div>
+            <div style="font-size:13px; color:#cbd5e1;">Official updates from ${branding.brandName}</div>
+          </div>
+        </div>
+      </div>
+    `.trim();
+
+    const footerHtml = `
+      <div style="background:${background}; padding:20px; border-radius:18px; text-align:center;">
+        <p style="margin:0; color:#e5e7eb; font-size:13px;">You're receiving this email from ${branding.brandName}.</p>
+        ${
+          branding.supportEmail
+            ? `<p style="margin:6px 0 0; color:#cbd5e1; font-size:13px;">Questions? <a href="mailto:${branding.supportEmail}" style="color:${accent}; text-decoration:none; font-weight:600;">${branding.supportEmail}</a></p>`
+            : ""
+        }
+      </div>
+    `.trim();
+
+    return { headerHtml, footerHtml };
   }
 
   private static async renderSystemTemplate(params: {

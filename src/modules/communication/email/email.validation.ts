@@ -61,42 +61,42 @@ export const sendEmailSchema = {
  export const updateBrandingSchema = {
    body: z.object({
      brandName: z.string().trim().min(1),
-     logoUrl: z.string().url().nullable().optional(),
-     darkLogoUrl: z.string().url().nullable().optional(),
+     logoMediaId: objectIdSchema.nullable().optional(),
+     darkLogoMediaId: objectIdSchema.nullable().optional(),
      primaryColor: z.string().trim().min(1),
      secondaryColor: z.string().trim().optional(),
      accentColor: z.string().trim().min(1),
      backgroundColor: z.string().trim().min(1),
      textColor: z.string().trim().min(1),
-     footerText: z.string().trim().nullable().optional(),
      supportEmail: z.string().email().nullable().optional(),
-     supportUrl: z.string().url().nullable().optional(),
-     socialLinks: z
-       .array(
-         z.object({
-           label: z.string().trim().min(1),
-           url: z.string().url(),
-         }),
-       )
-       .optional(),
    }),
  };
  export type UpdateBrandingDTO = z.infer<typeof updateBrandingSchema.body>;
 
  /** Marketing templates **/
- export const createMarketingTemplateSchema = {
-   body: z.object({
-     name: z.string().trim().min(2),
-     description: z.string().trim().nullable().optional(),
-     subjectKey: z.string().trim().min(1),
-     translations: translationsSchema,
-     hbs: z.string().trim().min(1),
-     previewData: z.record(z.string(), z.any()).optional(),
-   }),
- };
- export type CreateMarketingTemplateDTO = z.infer<
-   typeof createMarketingTemplateSchema.body
- >;
+export const createMarketingTemplateSchema = {
+  body: z.object({
+    name: z.string().trim().min(2),
+    description: z.string().trim().nullable().optional(),
+    subjectKey: z.string().trim().min(1),
+    translations: translationsSchema,
+    hbs: z.string().trim().min(1),
+    previewData: z.record(z.string(), z.any()).optional(),
+  }),
+};
+export type CreateMarketingTemplateDTO = z.infer<
+  typeof createMarketingTemplateSchema.body
+>;
+
+export const marketingDraftPreviewSchema = {
+  body: createMarketingTemplateSchema.body.extend({
+    data: z.record(z.string(), z.any()).optional(),
+    locale: z.nativeEnum(LangEnum).optional(),
+  }),
+};
+export type MarketingDraftPreviewDTO = z.infer<
+  typeof marketingDraftPreviewSchema.body
+>;
 
  export const updateMarketingTemplateSchema = {
    body: z
