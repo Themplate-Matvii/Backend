@@ -3,6 +3,21 @@ import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { RoleKey } from "@constants/permissions/roles";
 import { PlanKey } from "@constants/payments/plans";
+import { Readable } from "stream";
+
+export type MulterFile = {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+  stream?: Readable;
+  destination?: string;
+  filename?: string;
+  path?: string;
+};
+
 
 // Extend Express Request with JWT payload
 export interface RequestWithUser extends Request {
@@ -11,6 +26,8 @@ export interface RequestWithUser extends Request {
     role: RoleKey; // system role
     plan?: PlanKey; // subscription plan
   };
+  file?: MulterFile;
+  files?: MulterFile[] | Record<string, MulterFile[]>;
 }
 
 // OAuth claims returned by provider (OpenID Connect)

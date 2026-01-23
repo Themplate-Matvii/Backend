@@ -16,7 +16,7 @@ export interface AuthProvider {
 }
 
 export interface User extends Document {
-  _id: string;
+  _id: Types.ObjectId;
   email: string;
   emailVerified: boolean;
   emailVerifiedAt?: Date;

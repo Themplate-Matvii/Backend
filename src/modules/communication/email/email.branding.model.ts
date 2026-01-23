@@ -41,5 +41,5 @@ export const EmailBrandingModel = model<EmailBrandingDocument>(
 );
 
 export async function getActiveBranding(): Promise<EmailBrandingDocument | null> {
-  return EmailBrandingModel.findOne().sort({ updatedAt: -1 }).lean();
+  return EmailBrandingModel.findOne().sort({ updatedAt: -1 });
 }
