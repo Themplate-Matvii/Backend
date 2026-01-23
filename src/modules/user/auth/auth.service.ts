@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { Response } from "express";
 import { Types } from "mongoose";
-import { RequestWithUser } from "@modules/core/types/auth";
+import { MulterFile, RequestWithUser } from "@modules/core/types/auth";
 import { User, UserModel } from "@modules/user/user.model";
 import { comparePassword, hashPassword } from "@utils/auth/hash";
 import { signTokenPair, verifyRefreshToken } from "@utils/auth/token";
@@ -526,7 +526,7 @@ export class AuthService {
     },
     req: RequestWithUser,
     res: Response,
-    avatarFile?: Express.Multer.File,
+    avatarFile?: MulterFile,
   ) {
     const { email, password, name, locale, theme, avatar, avatarUrl } = body;
     const normalizedEmail = email.trim().toLowerCase();

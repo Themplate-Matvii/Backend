@@ -14,9 +14,9 @@ class LandingService {
     userId: string,
   ): Promise<LandingDocument[]> {
     if (scope === "any") {
-      return LandingModel.find().sort({ createdAt: -1 }).lean();
+      return LandingModel.find().sort({ createdAt: -1 });
     }
-    return LandingModel.find({ userId }).sort({ createdAt: -1 }).lean();
+    return LandingModel.find({ userId }).sort({ createdAt: -1 });
   }
 }
 

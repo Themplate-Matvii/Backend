@@ -7,6 +7,7 @@ import { AppError } from "@utils/common/appError";
 import { messages } from "@constants/messages";
 import { Readable } from "stream";
 import { Types } from "mongoose";
+import { MulterFile } from "@modules/core/types/auth";
 
 interface MediaMeta {
   name?: string;
@@ -78,7 +79,9 @@ export class MediaService {
       uploadedBy: this.serializeUploader(
         mediaObj.uploadedBy ?? (media as any).uploadedBy,
       ),
-      url: mediaObj.url || MediaService.getUrl(mediaObj.objectKey || mediaObj.filename),
+      url:
+        mediaObj.url ||
+        MediaService.getUrl(mediaObj.objectKey || mediaObj.filename),
     };
   }
 
@@ -134,11 +137,7 @@ export class MediaService {
   }
 
   // Upload file to Backblaze B2
-  static async upload(
-    file: Express.Multer.File,
-    userId: string,
-    meta: MediaMeta = {},
-  ) {
+  static async upload(file: MulterFile, userId: string, meta: MediaMeta = {}) {
     return this.uploadBuffer(
       file.buffer,
       file.mimetype,
@@ -179,7 +178,7 @@ export class MediaService {
         "",
       );
 
-      const file: Express.Multer.File = {
+      const file: MulterFile = {
         buffer,
         originalname: meta.name || `avatar.${ext || "jpg"}`,
         mimetype: contentType,

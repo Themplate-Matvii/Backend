@@ -54,8 +54,7 @@ class TrafficService {
       ...(filters.landingId ? { landingId: filters.landingId } : {}),
       ...(filters.userId ? { userId: filters.userId } : {}),
     })
-      .sort({ createdAt: -1 })
-      .lean();
+      .sort({ createdAt: -1 });
 
     const baseTotals = Object.values(TrafficEventEnum).reduce((acc, eventType) => {
       acc[eventType] = { total: 0, unique: 0 };
