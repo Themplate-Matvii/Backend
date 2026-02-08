@@ -33,7 +33,7 @@ async function start() {
     app.listen(Number(PORT), () => {
       const serverUrl =
         NODE_ENV === "production" && BASE_URL
-          ? BASE_URL
+          ? `${BASE_URL}${apiPath(API_CONFIG.ROUTES.DOCS)}`
           : `http://localhost:${PORT}${apiPath(API_CONFIG.ROUTES.DOCS)}`;
 
       logger.info(`🚀 Server running in ${NODE_ENV} mode at ${serverUrl}`);
