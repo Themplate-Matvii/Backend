@@ -9,6 +9,9 @@
     "test": "jest",
     "migrate:email-providers": "ts-node -r tsconfig-paths/register src/scripts/migrateEmailProviders.ts"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "resolutions": {
     "@types/express": "4.17.21",
     "@types/express-serve-static-core": "4.17.43"
