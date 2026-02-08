@@ -13,7 +13,7 @@ const PORT = Number(process.env.PORT) || 5000;
 const FRONTEND_PORT = Number(process.env.FRONTEND_PORT) || 3000;
 
 // Backend base URL: in prod take from env, in dev fallback to localhost
-const BASE_URL =
+const URL =
   process.env.BASE_URL && process.env.BASE_URL.length > 0
     ? process.env.BASE_URL
     : `http://localhost:${PORT}`;
@@ -29,8 +29,10 @@ export const ENV = {
 
   // Ports / base URLs
   PORT,
-  BASE_URL,
+  BASE_URL: `http://localhost:${PORT}`,
   FRONT_URL: FRONTEND_URL, // keep exported name FRONT_URL for compatibility
+
+  BASE_SWAGGER_URL: URL,
 
   // Database
   MONGO_URI: process.env.MONGO_URI!,
@@ -53,7 +55,7 @@ export const ENV = {
    *? OAuth
    */
   // Must point to BACKEND (Google will call `${OAUTH_REDIRECT_BASE_URL}/:provider/callback`)
-  OAUTH_REDIRECT_BASE_URL: `${BASE_URL}/api/auth/oauth`,
+  OAUTH_REDIRECT_BASE_URL: `${URL}/api/auth/oauth`,
 
   // Allowed FRONTEND redirects after we finish login and set cookies
   OAUTH_ALLOWED_REDIRECTS: `${FRONTEND_URL}/auth/callback`,

@@ -5,10 +5,7 @@ import { ENV } from "@config/env";
 // 🔽 single import from a central registry (we'll add it next)
 import { docsRegistry } from "@docs/registry";
 
-const serverUrl =
-  ENV.BASE_URL && ENV.NODE_ENV === "production"
-    ? `${ENV.BASE_URL}`
-    : `http://localhost:${ENV.PORT}`;
+const serverUrl = ENV.BASE_SWAGGER_URL;
 
 const options: swaggerJsdoc.Options = {
   definition: {
