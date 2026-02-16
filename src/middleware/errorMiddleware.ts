@@ -46,7 +46,7 @@ function normalizeError(err: any) {
     return {
       status: err.status || 500,
       message: err.message || "server.internalError",
-      details: err.details ?? null,
+      details: err.details ?? null, 
     };
   }
 
