@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import { IS_PROD } from "@config/env";
+import { REFRESH_COOKIE } from "@modules/user/auth/auth.service";
 
-const REFRESH_COOKIE_NAME = "rt";
 
 // Set HttpOnly refresh cookie
 export function setRefreshCookie(
@@ -9,7 +9,7 @@ export function setRefreshCookie(
   token: string,
   maxAgeMs?: number,
 ) {
-  res.cookie(REFRESH_COOKIE_NAME, token, {
+  res.cookie(REFRESH_COOKIE, token, {
     httpOnly: true,
     secure: IS_PROD,
     sameSite: "lax",
@@ -20,7 +20,7 @@ export function setRefreshCookie(
 
 // Clear refresh cookie
 export function clearRefreshCookie(res: Response) {
-  res.clearCookie(REFRESH_COOKIE_NAME, {
+  res.clearCookie(REFRESH_COOKIE, {
     path: "/",
     httpOnly: true,
     secure: IS_PROD,
