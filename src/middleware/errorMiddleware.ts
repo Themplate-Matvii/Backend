@@ -45,7 +45,7 @@ function normalizeError(err: any) {
   if (err instanceof AppError) {
     return {
       status: err.status || 500,
-      message: err.message || "internal.error",
+      message: err.message || "server.internalError",
       details: err.details ?? null,
     };
   }
@@ -55,8 +55,8 @@ function normalizeError(err: any) {
     message:
       process.env.NODE_ENV === "production" &&
       (err?.status === 500 || !err?.status)
-        ? "internal.error"
-        : err?.message || "internal.error",
+        ? "server.internalError"
+        : err?.message || "server.internalError",
     details:
       process.env.NODE_ENV === "production"
         ? null
@@ -71,16 +71,18 @@ export function errorMiddleware(
   next: NextFunction,
 ) {
   const { status, message, details } = normalizeError(err);
-  
+
   const translator = typeof req.t === "function" ? req.t.bind(req) : null;
   let localizedMessage = message;
-  
+
   if (translator) {
     try {
       localizedMessage = translator(message, details || {});
     } catch {
       localizedMessage =
-        typeof message === "string" ? translator(message) : "Internal Server Error";
+        typeof message === "string"
+          ? translator(message)
+          : "Internal Server Error";
     }
   }
 
