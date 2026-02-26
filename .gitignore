@@ -15,4 +15,3 @@
 *.sln
 *.sw?
 .env
-.env.*
