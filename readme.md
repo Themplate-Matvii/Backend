@@ -427,3 +427,9 @@ npm run start                  # node dist/main.js
 npm test                       # jest
 npm run migrate:email-providers # migration script
 ```
+
+## 🎯 Design Goals
+* Modularity
+* Clear domain boundaries
+* Replaceable providers (Stripe, email, storage)
+* Production-ready auth flow
